@@ -22,14 +22,20 @@ def http_get(url: str) -> str:
 
 
 def resolve_channel_id(handle: str) -> str:
-    """@ハンドルのページからチャンネルID(UC...)を取り出す。"""
+    """@ハンドルのページからチャンネルID(UC...)を取り出す。
+    正規URL(canonical)→externalId→channelIdの順で信頼度の高いものから試す。"""
     page = http_get(f"https://www.youtube.com/@{handle}")
-    m = re.search(r'"channelId":"(UC[0-9A-Za-z_-]{22})"', page)
-    if not m:
-        m = re.search(r"channel_id=(UC[0-9A-Za-z_-]{22})", page)
-    if not m:
-        raise RuntimeError("チャンネルIDが見つからない")
-    return m.group(1)
+    patterns = [
+        r'rel="canonical" href="https://www\.youtube\.com/channel/(UC[0-9A-Za-z_-]{22})"',
+        r'"externalId":"(UC[0-9A-Za-z_-]{22})"',
+        r'"channelId":"(UC[0-9A-Za-z_-]{22})"',
+    ]
+    for p in patterns:
+        m = re.search(p, page)
+        if m:
+            print(f"チャンネルID: {m.group(1)}")
+            return m.group(1)
+    raise RuntimeError("チャンネルIDが見つからない")
 
 
 def fetch_videos(channel_id: str):
