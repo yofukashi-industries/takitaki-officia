@@ -7,6 +7,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 HANDLE = "takiutachannel"   # YouTubeの@ハンドル名
+CHANNEL_ID = "UCK3Nz5qVqyHa-Y8_aIErl1A"  # 直接指定(空にするとHANDLEから自動解決)
 MAX_VIDEOS = 3              # サイトに載せる最新動画の数
 INDEX_FILE = "index.html"
 START = "<!-- VIDEOS:START (この間はGitHub Actionsが自動更新するので手で編集しない) -->"
@@ -72,7 +73,8 @@ def build_cards(videos) -> str:
 
 
 def main():
-    channel_id = resolve_channel_id(HANDLE)
+    channel_id = CHANNEL_ID or resolve_channel_id(HANDLE)
+    print(f"使用チャンネルID: {channel_id}")
     videos = fetch_videos(channel_id)
     if not videos:
         print("動画が取得できなかったので変更なし")
